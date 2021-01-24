@@ -1,0 +1,17 @@
+Host proxyServer
+  Hostname 127.0.0.1
+  Port 2222
+  User ubuntu
+  IdentitiesOnly yes
+  IdentityFile container-ssh-setup/proxyServer-privatekey
+  TCPKeepAlive yes
+  StrictHostKeyChecking no
+
+Host backendServer
+  Hostname backendServer
+  User ubuntu
+  IdentitiesOnly yes
+  IdentityFile container-ssh-setup/backendServer-privatekey
+  TCPKeepAlive yes
+  StrictHostKeyChecking no
+  ProxyCommand ssh -F ssh-config -W %h:%p ubuntu@proxyServer

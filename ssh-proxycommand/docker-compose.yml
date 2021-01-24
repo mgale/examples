@@ -1,0 +1,16 @@
+version: "3.3"
+services:
+  proxyServer:
+    image: public.ecr.aws/lts/ubuntu:20.04_stable
+    ports:
+        - "2222:22"
+    volumes:
+      - ./container-ssh-setup/proxyServer:/home/ubuntu/.ssh
+      - ./bin:/home/ubuntu/bin
+    command: /home/ubuntu/bin/startup-script.sh
+  backendServer:
+    image: public.ecr.aws/lts/ubuntu:20.04_stable
+    volumes:
+      - ./container-ssh-setup/backendServer:/home/ubuntu/.ssh
+      - ./bin:/home/ubuntu/bin
+    command: /home/ubuntu/bin/startup-script.sh
