@@ -6,6 +6,7 @@ Host proxyServer
   IdentityFile container-ssh-setup/proxyServer-privatekey
   TCPKeepAlive yes
   StrictHostKeyChecking no
+  UserKnownHostsFile /dev/null
 
 Host backendServer
   Hostname backendServer
@@ -14,4 +15,5 @@ Host backendServer
   IdentityFile container-ssh-setup/backendServer-privatekey
   TCPKeepAlive yes
   StrictHostKeyChecking no
+  UserKnownHostsFile /dev/null
   ProxyCommand ssh -F ssh-config -W %h:%p ubuntu@proxyServer
