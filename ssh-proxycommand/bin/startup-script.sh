@@ -8,4 +8,7 @@ useradd -rm -d /home/ubuntu -s /bin/bash -G sudo -U -u 1000 ubuntu
 service ssh restart
 service ssh restart
 touch /var/log/auth
+echo "###############################################################"
+echo "## Containers are ready !!!!"
+echo "###############################################################"
 tail -F /var/log/auth

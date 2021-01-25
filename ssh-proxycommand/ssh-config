@@ -7,6 +7,7 @@ Host proxyServer
   TCPKeepAlive yes
   StrictHostKeyChecking no
   UserKnownHostsFile /dev/null
+  LogLevel ERROR
 
 Host backendServer
   Hostname backendServer
@@ -16,4 +17,5 @@ Host backendServer
   TCPKeepAlive yes
   StrictHostKeyChecking no
   UserKnownHostsFile /dev/null
+  LogLevel ERROR
   ProxyCommand ssh -F ssh-config -W %h:%p ubuntu@proxyServer
