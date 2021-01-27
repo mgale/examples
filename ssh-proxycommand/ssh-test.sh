@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Ensure keys have correct permissions
+chmod 600 container-ssh-setup/*-privatekey
+
 echo "###########################################################"
 docker ps
 echo "###########################################################"
