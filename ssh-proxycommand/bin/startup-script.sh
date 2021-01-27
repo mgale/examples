@@ -1,7 +1,8 @@
 #!/bin/bash
 
 apt-get update
-apt-get -y install openssh-server sudo
+apt-get -y install rsyslog openssh-server sudo
+service rsyslog restart
 ssh-keygen -A
 useradd -rm -d /home/ubuntu -s /bin/bash -G sudo -U -u 1000 ubuntu
 chmod 600 /home/ubuntu/.ssh/*
@@ -12,4 +13,4 @@ touch /var/log/auth
 echo "###############################################################"
 echo "## Containers are ready !!!!"
 echo "###############################################################"
-tail -F /var/log/auth
+tail -F /var/log/auth.log
