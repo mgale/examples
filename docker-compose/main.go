@@ -4,10 +4,11 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 
-	"github.com/compose-spec/compose-go/loader"
-	"github.com/compose-spec/compose-go/types"
+	"github.com/compose-spec/compose-go/v2/loader"
+	"github.com/compose-spec/compose-go/v2/types"
 	"github.com/docker/cli/cli/command"
 	"github.com/docker/cli/cli/flags"
 	"github.com/docker/compose/v2/pkg/api"
@@ -15,14 +16,17 @@ import (
 )
 
 var dockerComposeBody string = `
-version: "3.8"
 services:
   testservice:
     image: ubuntu:latest
     environment:
       - COMPOSE_TEST=TestMe123
     command: sleep infinity
+    volumes:
+      - /tmp:/tmp
     init: true
+  testservice2:
+    build: .
 `
 
 func main() {
@@ -39,6 +43,12 @@ func main() {
 
 	p := createDockerProject(ctx, dockerComposeBody)
 
+	fmt.Println("Docker compose project created, list of known services:")
+	for _, service := range p.Services {
+		fmt.Println("Service:", service.Name)
+		fmt.Println("  Image:", service.Image)
+	}
+
 	srv, err := createDockerService()
 
 	if err != nil {
@@ -46,7 +56,20 @@ func main() {
 	}
 
 	fmt.Println("Docker service up...")
-	err = srv.Up(ctx, p, api.UpOptions{})
+
+	var buildOptions *api.BuildOptions
+	buildOptions = &api.BuildOptions{}
+	buildOptions.Services = p.ServiceNames()
+	buildOptions.Deps = true
+
+	createOpts := api.CreateOptions{
+		Build:         buildOptions,
+		Services:      p.ServiceNames(),
+		RemoveOrphans: true,
+		IgnoreOrphans: true,
+	}
+
+	err = srv.Up(ctx, p, api.UpOptions{Create: createOpts})
 	if err != nil {
 		log.Fatalln("error up:", err)
 	}
@@ -63,9 +86,12 @@ func main() {
 }
 
 func createDockerProject(ctx context.Context, data string) *types.Project {
+
+	defaultDockerContext, _ := os.Getwd()
+
 	configDetails := types.ConfigDetails{
 		// Fake path, doesn't need to exist.
-		WorkingDir: "/in-memory/",
+		WorkingDir: defaultDockerContext,
 		ConfigFiles: []types.ConfigFile{
 			{Filename: "docker-compose.yaml", Content: []byte(dockerComposeBody)},
 		},
@@ -87,8 +113,8 @@ func createDockerProject(ctx context.Context, data string) *types.Project {
 
 // createDockerService creates a docker service which can be
 // used to interact with docker-compose.
-func createDockerService() (api.Service, error) {
-	var srv api.Service
+func createDockerService() (api.Compose, error) {
+	var srv api.Compose
 	dockerCli, err := command.NewDockerCli()
 	if err != nil {
 		return srv, err
@@ -109,7 +135,7 @@ func createDockerService() (api.Service, error) {
 	return srv, nil
 }
 
-func myExec(ctx context.Context, srv api.Service, p *types.Project, cmd string) {
+func myExec(ctx context.Context, srv api.Compose, p *types.Project, cmd string) {
 	result, err := srv.Exec(ctx, p.Name, api.RunOptions{
 		Service:     "testservice",
 		Command:     []string{"/bin/bash", "-c", cmd},
