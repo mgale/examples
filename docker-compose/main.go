@@ -67,6 +67,7 @@ func main() {
 		Services:      p.ServiceNames(),
 		RemoveOrphans: true,
 		IgnoreOrphans: true,
+		QuietPull:     true,
 	}
 
 	err = srv.Up(ctx, p, api.UpOptions{Create: createOpts})
